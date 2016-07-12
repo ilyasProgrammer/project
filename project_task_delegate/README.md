@@ -41,6 +41,6 @@ Contributors
 Maintainer
 ----------
 
-[<img src="http://www.plustron.de/logo.png" alt="Plustron UG"/>](http://www.plustron.de)
+[<img src="http://www.plustron.de/logo.png" alt="Plustron GmbH"/>](http://www.plustron.de)
 
-This module is maintained by the Plustron UG.
+This module is maintained by the Plustron GmbH.
