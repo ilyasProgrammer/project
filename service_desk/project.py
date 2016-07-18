@@ -18,22 +18,17 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, orm
+from openerp import fields, api, models
 
 
-class ProjectProject(orm.Model):
+class ProjectProject(models.Model):
     _inherit = 'project.project'
-    _columns = {
-        'use_analytic_account': fields.selection(
-            [('no', 'No'), ('yes', 'Optional'), ('req', 'Required')],
-            'Use Analytic Account'),
-        }
-    _defaults = {
-        'use_analytic_account': 'no',
-        }
+
+    use_analytic_account = fields.Selection([('no', 'No'), ('yes', 'Optional'), ('req', 'Required')],
+                                            string='Use Analytic Account', default="no")
 
 
-class ProjectTask(orm.Model):
+class ProjectTask(models.Model):
     """
     Add related ``Analytic Account`` and service ``Location``.
     A Location can be any Contact Partner of the AA's Partner.
@@ -42,19 +37,12 @@ class ProjectTask(orm.Model):
     modules implementing these other possibilities are very welcome.
     """
     _inherit = 'project.task'
-    _columns = {
-        'analytic_account_id': fields.many2one(
-            'account.analytic.account', 'Contract/Analytic',
-            domain="[('type','in',['normal','contract'])]"),
-        'location_id': fields.many2one(
-            'res.partner', 'Location',
-            domain="[('parent_id','child_of',partner_id)]"),
-        'use_analytic_account': fields.related(
-            'project_id', 'use_analytic_account',
-            type='char', string="Use Analytic Account"),
-        'project_code': fields.related(
-            'project_id', 'code', type='char', string="Project Code"),
-        }
+
+    analytic_account_id = fields.Many2one('account.analytic.account', 'Contract/Analytic',
+                                          domain="[('account_type','in',['normal',])]")
+    location_id = fields.Many2one('res.partner', 'Location', domain="[('parent_id','child_of',partner_id)]")
+    use_analytic_account = fields.Selection(related='project_id.use_analytic_account', string="Use Analytic Account")
+    project_code = fields.Char(related='project_id.code', string="Project Code")
 
     def onchange_project(self, cr, uid, id, project_id, context=None):
         # on_change is necessary to populate fields on Create, before saving
@@ -87,3 +75,4 @@ class ProjectTask(orm.Model):
                             for orig, dest in fldmap
                             if hasattr(obj, orig) and getattr(obj, orig)}
         return res
+

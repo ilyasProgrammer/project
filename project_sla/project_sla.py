@@ -18,44 +18,33 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, orm
+from openerp import fields, api, models
 
 
-class SLADefinition(orm.Model):
+class SLADefinition(models.Model):
     """
     SLA Definition
     """
     _name = 'project.sla'
     _description = 'SLA Definition'
-    _columns = {
-        'name': fields.char('Title', size=64, required=True, translate=True),
-        'active': fields.boolean('Active'),
-        'control_model': fields.char('For documents', size=128, required=True),
-        'control_field_id': fields.many2one(
-            'ir.model.fields', 'Control Date', required=True,
-            domain="[('model_id.model', '=', control_model),"
-                   " ('ttype', 'in', ['date', 'datetime'])]",
-            help="Date field used to check if the SLA was achieved."),
-        'sla_line_ids': fields.one2many(
-            'project.sla.line', 'sla_id', 'Definitions'),
-        'analytic_ids': fields.many2many(
-            'account.analytic.account', string='Contracts'),
-        }
-    _defaults = {
-        'active': True,
-        }
 
-    def _reapply_slas(self, cr, uid, ids, recalc_closed=False, context=None):
+    name = fields.Char('Title', size=64, required=True, translate=True)
+    active = fields.Boolean('Active', default=True)
+    control_model = fields.Many2one('ir.model', string="Control Model", required=True)
+    control_field_id = fields.Many2one('ir.model.fields', 'Control Date', required=True,
+                                       domain="[('model_id.model', '=', control_model), ('ttype', 'in', ['date', 'datetime'])]",
+                                       help="Date field used to check if the SLA was achieved.")
+    sla_line_ids = fields.One2many('project.sla.line', 'sla_id', 'Definitions')
+    analytic_ids = fields.Many2many('account.analytic.account', string='Contracts')
+
+    @api.multi
+    def _reapply_slas(self, recalc_closed=False):
         """
         Force SLA recalculation on all _open_ Contracts for the selected SLAs.
         To use upon SLA Definition modifications.
         """
-        contract_obj = self.pool.get('account.analytic.account')
-        for sla in self.browse(cr, uid, ids, context=context):
-            contr_ids = [x.id for x in sla.analytic_ids if x.state == 'open']
-            contract_obj._reapply_sla(
-                cr, uid, contr_ids, recalc_closed=recalc_closed,
-                context=context)
+        for contract in [c for c in self.browse(self._context['active_ids']).analytic_ids if c.state == 'open']:
+            contract._reapply_sla(recalc_closed=recalc_closed)
         return True
 
     def reapply_slas(self, cr, uid, ids, context=None):
@@ -63,24 +52,20 @@ class SLADefinition(orm.Model):
         return self._reapply_slas(cr, uid, ids, context=context)
 
 
-class SLARules(orm.Model):
+class SLARules(models.Model):
     """
     SLA Definition Rule Lines
     """
     _name = 'project.sla.line'
     _definition = 'SLA Definition Rule Lines'
     _order = 'sla_id,sequence'
-    _columns = {
-        'sla_id': fields.many2one('project.sla', 'SLA Definition'),
-        'sequence': fields.integer('Sequence'),
-        'name': fields.char('Title', size=64, required=True, translate=True),
-        'condition': fields.char(
-            'Condition', size=256, help="Apply only if this expression is "
-            "evaluated to True. The document fields can be accessed using "
-            "either o, obj or object. Example: obj.priority <= '2'"),
-        'limit_qty': fields.integer('Hours to Limit'),
-        'warn_qty': fields.integer('Hours to Warn'),
-        }
-    _defaults = {
-        'sequence': 10,
-        }
+
+    sla_id = fields.Many2one('project.sla', 'SLA Definition')
+    sequence = fields.Integer('Sequence', default=10)
+    name = fields.Char('Title', size=64, required=True, translate=True)
+    condition = fields.Char('Condition', size=256,
+                            help="Apply only if this expression is evaluated to True. "
+                                 "The document fields can be accessed using either o, "
+                                 "obj or object. Example: obj.priority <= '2'")
+    limit_qty = fields.Integer('Hours to Limit')
+    warn_qty = fields.Integer('Hours to Warn')

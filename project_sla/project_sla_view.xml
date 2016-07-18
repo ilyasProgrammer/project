@@ -6,7 +6,6 @@
             <field name="name">view_sla_lines_tree</field>
             <field name="model">project.sla.line</field>
             <field name="arch" type="xml">
-
                 <tree string="Definitions">
                     <field name="sequence"/>
                     <field name="name"/>
@@ -14,7 +13,6 @@
                     <field name="limit_qty"/>
                     <field name="warn_qty"/>
                 </tree>
-
             </field>
         </record>
 
@@ -22,7 +20,6 @@
             <field name="name">view_sla_form</field>
             <field name="model">project.sla</field>
             <field name="arch" type="xml">
-
                 <form string="SLA Definition">
                   <h1>
                       <field name="name"/>

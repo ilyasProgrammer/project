@@ -2,6 +2,7 @@
 ##############################################################################
 #
 #    Copyright (C) 2012-2013 Daniel Reis
+#       ported to v9 2016 Karsten Kinateder
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -20,7 +21,7 @@
 {
     'name': 'Service Desk',
     'summary': 'Use Projects for Service Desks and service teams',
-    'version': '8.0.1.1.0',
+    'version': '9.0.1.1.0',
     "category": "Project Management",
     'description': """\
 Available service desks/teams are defined as Projects.
@@ -52,6 +53,6 @@ Features:
         'analytic_contact_view.xml',
         'service_desk_view.xml',
     ],
-    'installable': False,
+    'installable': True,
     'application': True,
 }

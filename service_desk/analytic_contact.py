@@ -18,15 +18,13 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, orm
+from openerp import fields, models
 
 
-class AnalyticAccount(orm.Model):
+class AnalyticAccount(models.Model):
     """Add Contact to Analytic Accounts"""
     _inherit = 'account.analytic.account'
-    _columns = {
-        'contact_id': fields.many2one(
-            'res.partner', 'Contact',
-            domain="[('parent_id','child_of',partner_id)"
-                   ",('parent_id','!=',False)]"),
-        }
+
+    contact_id = fields.Many2one('res.partner', 'Contact', domain="[('parent_id','child_of',partner_id)"
+                                                                  ",('parent_id','!=',False)]")
+    manager_id = fields.Many2one('res.users')

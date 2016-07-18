@@ -8,7 +8,6 @@
             <field name="name">view_sla_control_tree</field>
             <field name="model">project.sla.control</field>
             <field name="arch" type="xml">
-
                 <tree string="Service Level">
                     <field name="sla_line_id"/>
                     <field name="sla_state"/>
@@ -17,7 +16,6 @@
                     <field name="sla_limit_date"/>
                     <field name="sla_close_date"/>
                 </tree>
-
             </field>
         </record>
 
