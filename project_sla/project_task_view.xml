@@ -9,7 +9,7 @@
             <field name="inherit_id" ref="project.view_task_form2"/>
             <field name="arch" type="xml">
 
-              <page string="Extra Info" position="after">
+              <xpath expr="//notebook" position="inside">
                 <page name="sla_page" string="Service Levels"
                        attrs="{'invisible': [('sla_state', '=', False)]}">
                     <group>
@@ -22,7 +22,7 @@
                     </group>
                     <field name="sla_control_ids" attrs="{'readonly': 1}"/>
                 </page>
-              </page>
+              </xpath>
 
            </field>
         </record>
@@ -50,9 +50,9 @@
             <field name="inherit_id" ref="project.view_task_search_form"/>
             <field name="arch" type="xml">
 
-                <filter string="Stage" position="before">
+                <group position="inside">
                     <filter string="SLA Status" context="{'group_by':'sla_state'}"/>
-                </filter>
+                </group>
 
            </field>
         </record>

@@ -9,7 +9,7 @@
             <field name="inherit_id" ref="project_issue.project_issue_form_view"/>
             <field name="arch" type="xml">
 
-              <page string="Extra Info" position="after">
+              <xpath expr="//notebook" position="inside">
                 <page name="sla_page" string="Service Levels"
                       attrs="{'invisible': [('sla_state', '=', False)]}">
                     <group>
@@ -22,7 +22,7 @@
                     </group>
                     <field name="sla_control_ids"/>
                 </page>
-              </page>
+              </xpath>
 
            </field>
         </record>
