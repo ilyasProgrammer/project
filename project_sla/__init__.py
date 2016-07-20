@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from . import project_sla
-from . import analytic_account
-from . import project_sla_control
-from . import project_issue
-from . import project_task
-from . import report
+import project_sla
+import analytic_account
+import project_sla_control
+import project_issue
+import project_task
+import report

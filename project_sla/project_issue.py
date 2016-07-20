@@ -18,12 +18,13 @@
 #
 ##############################################################################
 
-from openerp.osv import orm
+from openerp import models
 
 
-class ProjectIssue(orm.Model):
+class ProjectIssue(models.Model):
     """
     Extend Project Issues to be SLA Controlled
     """
     _name = 'project.issue'
+
     _inherit = ['project.issue', 'project.sla.controlled']

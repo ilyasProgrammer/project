@@ -32,24 +32,30 @@ class SLADefinition(models.Model):
     active = fields.Boolean('Active', default=True)
     control_model = fields.Many2one('ir.model', string="Control Model", required=True)
     control_field_id = fields.Many2one('ir.model.fields', 'Control Date', required=True,
-                                       domain="[('model_id.model', '=', control_model), ('ttype', 'in', ['date', 'datetime'])]",
+                                       domain="[('model_id', '=', control_model), ('ttype', 'in', ['date', 'datetime'])]",
                                        help="Date field used to check if the SLA was achieved.")
     sla_line_ids = fields.One2many('project.sla.line', 'sla_id', 'Definitions')
     analytic_ids = fields.Many2many('account.analytic.account', string='Contracts')
 
+    @api.onchange('control_model')
+    def _onchange_control_model(self):
+        self.control_field_id = ''
+        return {'control_field_id': {'domain': ['model_id', '=', self.control_model]}}
+
     @api.multi
-    def _reapply_slas(self, recalc_closed=False):
+    def _reapply_sla(self, recalc_closed=False):
         """
         Force SLA recalculation on all _open_ Contracts for the selected SLAs.
         To use upon SLA Definition modifications.
         """
-        for contract in [c for c in self.browse(self._context['active_ids']).analytic_ids if c.state == 'open']:
-            contract._reapply_sla(recalc_closed=recalc_closed)
+        for account in self.browse(self._ids):
+            account._reapply_sla(recalc_closed=recalc_closed)
         return True
 
-    def reapply_slas(self, cr, uid, ids, context=None):
+    @api.multi
+    def reapply_sla(self):
         """ Reapply SLAs button action """
-        return self._reapply_slas(cr, uid, ids, context=context)
+        return self._reapply_slas()
 
 
 class SLARules(models.Model):
@@ -58,7 +64,7 @@ class SLARules(models.Model):
     """
     _name = 'project.sla.line'
     _definition = 'SLA Definition Rule Lines'
-    _order = 'sla_id,sequence'
+    _order = 'sequence'
 
     sla_id = fields.Many2one('project.sla', 'SLA Definition')
     sequence = fields.Integer('Sequence', default=10)

@@ -7,12 +7,10 @@
             <field name="model">project.project</field>
             <field name="inherit_id" ref="project.edit_project"/>
             <field name="arch" type="xml">
-
                 <!-- make resource calendar always visible -->
                 <field name="resource_calendar_id" position="attributes">
                     <attribute name="groups"/>
                 </field>
-
            </field>
         </record>
 

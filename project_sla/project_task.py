@@ -18,9 +18,10 @@
 #
 ##############################################################################
 
-from openerp.osv import orm
+from openerp import models
 
 
-class ProjectTask(orm.Model):
+class ProjectTask(models.Model):
     _name = 'project.task'
+
     _inherit = ['project.task', 'project.sla.controlled']

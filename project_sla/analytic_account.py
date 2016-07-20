@@ -18,48 +18,44 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, orm
+from openerp import fields, models, api
 import logging
 _logger = logging.getLogger(__name__)
 
 
-class AnalyticAccount(orm.Model):
+class AnalyticAccount(models.Model):
     """ Add SLA to Analytic Accounts """
     _inherit = 'account.analytic.account'
-    _columns = {
-        'sla_ids': fields.many2many(
-            'project.sla', string='Service Level Agreement'),
-        }
 
-    def _reapply_sla(self, cr, uid, ids, recalc_closed=False, context=None):
+    sla_ids = fields.Many2many('project.sla', string='Service Level Agreement')
+
+    @api.multi
+    def _reapply_sla(self, recalc_closed=False):
         """
         Force SLA recalculation on open documents that already are subject to
         this SLA Definition.
         To use after changing a Contract SLA or it's Definitions.
         The ``recalc_closed`` flag allows to also recompute closed documents.
         """
-        ctrl_obj = self.pool['project.sla.control']
-        for contract in self.browse(cr, uid, ids, context=context):
+        ctrl_obj = self.env['project.sla.control']
+        for contract in self.browse(self._ids):
             # for each contract, and for each model under SLA control ...
-            ctrl_models = set([sla.control_model for sla in contract.sla_ids])
-            for model_name in ctrl_models:
-                model = self.pool[model_name]
+            ctrl_models = set([self.env[sla.control_model.model] for sla in contract.sla_ids])
+            for model in ctrl_models:
                 base = [] if recalc_closed else [('stage_id.fold', '=', 0)]
                 doc_ids = []
                 if 'analytic_account_id' in model._columns:
-                    domain = base + [
-                        ('analytic_account_id', '=', contract.id)]
-                    doc_ids += model.search(cr, uid, domain, context=context)
+                    domain = base + [('analytic_account_id', '=', contract.id)]
+                    doc_ids += model.search(domain)
                 if 'project_id' in model._columns:
-                    domain = base + [
-                        ('project_id.analytic_account_id', '=', contract.id)]
-                    doc_ids += model.search(cr, uid, domain, context=context)
+                    domain = base + [('project_id.analytic_account_id', '=', contract.id)]
+                    doc_ids += model.search(domain)
                 if doc_ids:
-                    model = self.pool[model_name]
-                    docs = model.browse(cr, uid, doc_ids, context=context)
-                    ctrl_obj.store_sla_control(cr, uid, docs, context=context)
+                    docs = model.browse(doc_ids)
+                    ctrl_obj.store_sla_control(docs)
         return True
 
-    def reapply_sla(self, cr, uid, ids, context=None):
+    @api.multi
+    def reapply_sla(self):
         """ Reapply SLAs button action """
-        return self._reapply_sla(cr, uid, ids, context=context)
+        return self._reapply_sla()
